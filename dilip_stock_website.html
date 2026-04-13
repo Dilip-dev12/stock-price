@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockVision | Dilip.R</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1628;
+    --navy2: #112040;
+    --blue: #1a6ef5;
+    --blue2: #4d93ff;
+    --gold: #f5c842;
+    --white: #f5f7ff;
+    --gray: #8899bb;
+    --card: #131f38;
+    --border: rgba(100,150,255,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 5%;
+    background: rgba(11,22,40,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: var(--white); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--gold); }
+  .nav-brand { font-size: 11px; color: var(--gray); letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: var(--gray); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 5% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(26,110,245,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(26,110,245,0.15);
+    border: 0.5px solid rgba(26,110,245,0.4);
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-size: 12px;
+    color: var(--blue2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 7vw, 82px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero h1 span { color: var(--gold); }
+  .hero p {
+    font-size: 16px;
+    color: var(--gray);
+    max-width: 540px;
+    margin: 0 auto 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s 0.3s ease both; }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--blue2); transform: translateY(-2px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--white);
+    border: 0.5px solid rgba(255,255,255,0.25);
+    padding: 13px 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.6); transform: translateY(-2px); }
+
+  /* STATS BAR */
+  .stats {
+    display: flex; justify-content: center; gap: 0;
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    background: var(--navy2);
+    flex-wrap: wrap;
+  }
+  .stat { padding: 22px 40px; text-align: center; border-right: 0.5px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: var(--white); }
+  .stat-num span { color: var(--gold); }
+  .stat-label { font-size: 11px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+
+  /* SECTIONS */
+  section { padding: 90px 5%; }
+  .sec-header { text-align: center; margin-bottom: 56px; }
+  .sec-tag { font-size: 11px; color: var(--blue2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+  .sec-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 42px); font-weight: 700; letter-spacing: -1px; }
+  .sec-sub { font-size: 15px; color: var(--gray); margin-top: 12px; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+  /* WEBSITE CARDS */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .site-card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--blue);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .site-card:hover { border-color: rgba(26,110,245,0.4); transform: translateY(-4px); }
+  .site-card:hover::after { transform: scaleX(1); }
+  .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .card-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .ic-blue { background: rgba(26,110,245,0.18); color: var(--blue2); }
+  .ic-gold { background: rgba(245,200,66,0.15); color: var(--gold); }
+  .ic-green { background: rgba(52,199,89,0.15); color: #34c759; }
+  .ic-purple { background: rgba(175,82,222,0.15); color: #af52de; }
+  .ic-teal { background: rgba(90,200,250,0.15); color: #5ac8fa; }
+  .ic-coral { background: rgba(255,100,80,0.15); color: #ff6450; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; }
+  .card-link { font-size: 12px; color: var(--blue2); text-decoration: none; }
+  .card-link:hover { text-decoration: underline; }
+  .card-desc { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 14px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .badge-free { background: rgba(52,199,89,0.15); color: #34c759; }
+  .badge-freemium { background: rgba(26,110,245,0.15); color: var(--blue2); }
+  .badge-paid { background: rgba(245,200,66,0.12); color: var(--gold); }
+  .visit-btn {
+    font-size: 12px; color: var(--gray); text-decoration: none;
+    border: 0.5px solid var(--border); border-radius: 6px;
+    padding: 4px 12px; transition: color 0.2s, border-color 0.2s;
+  }
+  .visit-btn:hover { color: var(--white); border-color: rgba(255,255,255,0.3); }
+
+  /* METHODS */
+  .methods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .method-card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+  }
+  .method-icon { font-size: 28px; margin-bottom: 14px; }
+  .method-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .method-desc { font-size: 13px; color: var(--gray); line-height: 1.65; }
+
+  /* MARKET CONTEXT */
+  .context-box {
+    max-width: 900px; margin: 0 auto;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+  }
+  .context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 28px; }
+  .ctx-item { text-align: center; }
+  .ctx-num { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; color: var(--gold); }
+  .ctx-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
+  .ctx-text { font-size: 14px; color: var(--gray); line-height: 1.7; margin-top: 20px; }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    max-width: 800px; margin: 0 auto;
+    background: rgba(245,200,66,0.06);
+    border: 0.5px solid rgba(245,200,66,0.25);
+    border-radius: 12px;
+    padding: 28px 32px;
+    font-size: 13px; color: var(--gray); line-height: 1.7;
+    text-align: center;
+  }
+  .disclaimer strong { color: var(--gold); }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 32px 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+  .footer-logo span { color: var(--gold); }
+  .footer-copy { font-size: 12px; color: var(--gray); }
+  .footer-author { font-size: 12px; color: var(--gray); }
+  .footer-author strong { color: var(--blue2); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .stat { padding: 16px 20px; }
+    .context-box { padding: 24px; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div>
+    <div class="nav-logo">Stock<span>Vision</span></div>
+    <div class="nav-brand">by Dilip.R</div>
+  </div>
+  <div class="nav-links">
+    <a href="#websites">Websites</a>
+    <a href="#methods">Methods</a>
+    <a href="#market">Market</a>
+    <a href="#disclaimer">Disclaimer</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">April 2026 Edition</div>
+  <h1>Stock Price<br><span>Prediction</span> Hub</h1>
+  <p>Top AI-powered tools, websites, and methods to research, forecast, and analyze stock prices — curated by Dilip.R</p>
+  <div class="hero-btns">
+    <a href="#websites" class="btn-primary">Explore Websites</a>
+    <a href="#methods" class="btn-secondary">Learn Methods</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">10<span>+</span></div><div class="stat-label">Top Websites</div></div>
+  <div class="stat"><div class="stat-num"><span>$</span>66.4T</div><div class="stat-label">Market Cap</div></div>
+  <div class="stat"><div class="stat-num">30<span>%</span></div><div class="stat-label">AI Tool Adoption</div></div>
+  <div class="stat"><div class="stat-num">5<span>+</span></div><div class="stat-label">Prediction Methods</div></div>
+</div>
+
+<!-- WEBSITES -->
+<section id="websites">
+  <div class="sec-header">
+    <div class="sec-tag">Resources</div>
+    <div class="sec-title">Top Prediction Websites</div>
+    <div class="sec-sub">Click any card to visit the website directly</div>
+  </div>
+  <div class="cards-grid">
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-blue">TR</div>
+        <div>
+          <div class="card-title">TipRanks</div>
+          <a class="card-link" href="https://www.tipranks.com" target="_blank">tipranks.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Analyst ratings, price targets & institutional research tools for retail investors.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://www.tipranks.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-green">WZ</div>
+        <div>
+          <div class="card-title">WallStreetZen</div>
+          <a class="card-link" href="https://www.wallstreetzen.com/stock-screener/stock-forecast" target="_blank">wallstreetzen.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI stock predictors, screening tools & fundamental analysis made simple.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://www.wallstreetzen.com/stock-screener/stock-forecast" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-gold">SI</div>
+        <div>
+          <div class="card-title">StockInvest.us</div>
+          <a class="card-link" href="https://stockinvest.us" target="_blank">stockinvest.us</a>
+        </div>
+      </div>
+      <div class="card-desc">Technical forecasts & AI advice for 50,000+ stocks across 48 exchanges.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://stockinvest.us" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-teal">CC</div>
+        <div>
+          <div class="card-title">CoinCodex</div>
+          <a class="card-link" href="https://coincodex.com/stocks/predictions/" target="_blank">coincodex.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI technical analysis using RSI, SMA & EMA indicators. Free stock predictions.</div>
+      <div class="card-footer">
+        <span class="badge badge-free">Free</span>
+        <a class="visit-btn" href="https://coincodex.com/stocks/predictions/" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-blue">SA</div>
+        <div>
+          <div class="card-title">StockAnalysis</div>
+          <a class="card-link" href="https://stockanalysis.com" target="_blank">stockanalysis.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Financials, earnings calendars & forecasts for 130,000+ stocks and funds.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://stockanalysis.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-purple">TE</div>
+        <div>
+          <div class="card-title">TradingEconomics</div>
+          <a class="card-link" href="https://tradingeconomics.com/forecast/stock-market" target="_blank">tradingeconomics.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Macro economic data & global stock index forecasts for 196 countries.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://tradingeconomics.com/forecast/stock-market" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-teal">IK</div>
+        <div>
+          <div class="card-title">I Know First</div>
+          <a class="card-link" href="https://iknowfirst.com" target="_blank">iknowfirst.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Self-learning AI algorithm signals for institutional & retail investors globally.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://iknowfirst.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-purple">TS</div>
+        <div>
+          <div class="card-title">TrendSpider</div>
+          <a class="card-link" href="https://trendspider.com" target="_blank">trendspider.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI strategy builder with 50-year backtesting & custom ML model creation.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://trendspider.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-green">TS</div>
+        <div>
+          <div class="card-title">Tradestie</div>
+          <a class="card-link" href="https://tradestie.com" target="_blank">tradestie.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Free AI bull/bear scenario analysis with analyst ratings & expert insights.</div>
+      <div class="card-footer">
+        <span class="badge badge-free">Free</span>
+        <a class="visit-btn" href="https://tradestie.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card">
+      <div class="card-head">
+        <div class="card-icon ic-coral">SA</div>
+        <div>
+          <div class="card-title">Seeking Alpha</div>
+          <a class="card-link" href="https://seekingalpha.com" target="_blank">seekingalpha.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Expert analysis, quant ratings & earnings forecasts from market professionals.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://seekingalpha.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- METHODS -->
+<section id="methods" style="background: var(--navy2);">
+  <div class="sec-header">
+    <div class="sec-tag">Education</div>
+    <div class="sec-title">Prediction Methods</div>
+    <div class="sec-sub">Understanding how stock prices are forecasted</div>
+  </div>
+  <div class="methods-grid">
+    <div class="method-card">
+      <div class="method-icon">📈</div>
+      <div class="method-title">Technical Analysis</div>
+      <div class="method-desc">Uses historical price data, volume, moving averages (SMA/EMA), RSI, MACD, and chart patterns to identify trends and forecast future movements.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🏢</div>
+      <div class="method-title">Fundamental Analysis</div>
+      <div class="method-desc">Evaluates a company's financial health — earnings, revenue growth, P/E ratio, and debt levels — to estimate fair value and future price.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🤖</div>
+      <div class="method-title">AI & Machine Learning</div>
+      <div class="method-desc">Models like Random Forest, KNN, and neural networks are trained on historical data to identify complex patterns beyond human detection.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🎯</div>
+      <div class="method-title">Analyst Consensus</div>
+      <div class="method-desc">Wall Street sell-side analysts issue 12-month price targets based on deep sector expertise. TipRanks and WallStreetZen aggregate these signals.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">💬</div>
+      <div class="method-title">Sentiment Analysis</div>
+      <div class="method-desc">Scans news, social media, and earnings calls to gauge investor sentiment and its potential impact on future stock price movements.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section id="market">
+  <div class="sec-header">
+    <div class="sec-tag">Context</div>
+    <div class="sec-title">Market Overview — April 2026</div>
+  </div>
+  <div class="context-box">
+    <div class="context-grid">
+      <div class="ctx-item"><div class="ctx-num">$66.4T</div><div class="ctx-label">NYSE/NASDAQ Market Cap</div></div>
+      <div class="ctx-item"><div class="ctx-num">39</div><div class="ctx-label">Fear & Greed Index</div></div>
+      <div class="ctx-item"><div class="ctx-num">30%</div><div class="ctx-label">Retail AI Tool Users</div></div>
+      <div class="ctx-item"><div class="ctx-num">+75%</div><div class="ctx-label">YoY AI Adoption Growth</div></div>
+    </div>
+    <div class="ctx-text">
+      2026 has been one of the most volatile years for investors in recent memory. AI and software stocks dropped over 20% in the first six weeks of the year. Trade policy uncertainty and geopolitical tensions have driven elevated market swings. Despite this, AI-powered prediction tools are seeing record retail adoption, with roughly 30% of U.S. retail investors now using AI tools to guide portfolio decisions — up 75% year-over-year (eToro, 2026).
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<section id="disclaimer" style="background: var(--navy2); padding-top: 60px; padding-bottom: 60px;">
+  <div class="disclaimer">
+    <strong>⚠️ Important Disclaimer</strong><br><br>
+    Stock price predictions are for informational purposes only and do not constitute financial advice. Past performance is not indicative of future results. No prediction model or algorithm guarantees accuracy. Always consult a qualified financial advisor before making investment decisions. Diversification and long-term index investing have historically outperformed most individual stock-picking strategies.
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Stock<span>Vision</span></div>
+  <div class="footer-copy">© 2026 All rights reserved</div>
+  <div class="footer-author">Developed by <strong>Dilip.R</strong></div>
+</footer>
+
+</body>
+</html>
