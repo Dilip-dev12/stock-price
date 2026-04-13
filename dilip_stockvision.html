@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockVision | Dilip.R</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     CSS - All Styles
+     ============================================================ -->
+<style>
+  :root {
+    --navy: #0b1628;
+    --navy2: #112040;
+    --blue: #1a6ef5;
+    --blue2: #4d93ff;
+    --gold: #f5c842;
+    --white: #f5f7ff;
+    --gray: #8899bb;
+    --card: #131f38;
+    --border: rgba(100,150,255,0.13);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy2); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 4px; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 5%;
+    background: rgba(11,22,40,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 0.5px solid var(--border);
+    transition: box-shadow 0.3s;
+  }
+  nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.4); }
+  .nav-left { display: flex; flex-direction: column; gap: 1px; }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px; color: var(--white); letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--gold); }
+  .nav-brand { font-size: 10px; color: var(--gray); letter-spacing: 0.1em; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 26px; align-items: center; }
+  .nav-links a { color: var(--gray); text-decoration: none; font-size: 13px; transition: color 0.2s; position: relative; }
+  .nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:1px; background:var(--blue2); transform:scaleX(0); transition:transform 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { transform:scaleX(1); }
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; }
+  .hamburger span { display:block; width:22px; height:2px; background:var(--gray); border-radius:2px; transition:all 0.3s; }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+  .hamburger.open span:nth-child(2) { opacity:0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+  .mobile-menu {
+    display:none; position:fixed; top:60px; left:0; right:0; z-index:199;
+    background: rgba(11,22,40,0.97); backdrop-filter:blur(16px);
+    flex-direction:column; padding:20px 5%;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .mobile-menu.open { display:flex; }
+  .mobile-menu a { color:var(--gray); text-decoration:none; font-size:15px; padding:12px 0; border-bottom:0.5px solid var(--border); transition:color 0.2s; }
+  .mobile-menu a:last-child { border-bottom:none; }
+  .mobile-menu a:hover { color:var(--white); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 5% 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position:absolute; top:-200px; left:50%; transform:translateX(-50%);
+    width:900px; height:900px;
+    background: radial-gradient(circle, rgba(26,110,245,0.16) 0%, transparent 70%);
+    pointer-events:none; animation: pulse 6s ease-in-out infinite;
+  }
+  .hero-grid {
+    position:absolute; inset:0; pointer-events:none; opacity:0.04;
+    background-image: linear-gradient(var(--blue2) 1px, transparent 1px), linear-gradient(90deg, var(--blue2) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(26,110,245,0.15);
+    border: 0.5px solid rgba(26,110,245,0.45);
+    border-radius: 20px; padding: 5px 18px;
+    font-size: 12px; color: var(--blue2);
+    letter-spacing: 0.07em; text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity:0; transform:translateY(20px);
+    animation: fadeUp 0.7s 0.1s ease forwards;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 7vw, 84px);
+    font-weight: 800; line-height: 1.04;
+    letter-spacing: -2.5px; margin-bottom: 24px;
+    opacity:0; transform:translateY(20px);
+    animation: fadeUp 0.7s 0.2s ease forwards;
+  }
+  .hero h1 .gold { color: var(--gold); }
+  .hero-sub {
+    font-size: 16px; color: var(--gray);
+    max-width: 520px; margin: 0 auto 40px;
+    opacity:0; transform:translateY(20px);
+    animation: fadeUp 0.7s 0.3s ease forwards;
+  }
+  .hero-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    opacity:0; transform:translateY(20px);
+    animation: fadeUp 0.7s 0.4s ease forwards;
+  }
+  .btn-primary {
+    background: var(--blue); color: #fff; border: none;
+    padding: 13px 32px; border-radius: 8px;
+    font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { background: var(--blue2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,110,245,0.35); }
+  .btn-secondary {
+    background: transparent; color: var(--white);
+    border: 0.5px solid rgba(255,255,255,0.25);
+    padding: 13px 32px; border-radius: 8px;
+    font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; text-decoration: none;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.6); transform: translateY(-2px); }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-down {
+    position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    font-size:11px; color:var(--gray); letter-spacing:0.08em; text-transform:uppercase;
+    animation: bounce 2s ease-in-out infinite;
+    opacity:0; animation: fadeUp 1s 1s ease forwards, bounce 2s 2s ease-in-out infinite;
+  }
+  .scroll-down::after {
+    content:''; width:1px; height:32px; background:linear-gradient(var(--blue2), transparent);
+  }
+
+  /* ── STATS BAR ── */
+  .stats {
+    display: flex; justify-content: center;
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    background: var(--navy2); flex-wrap: wrap;
+  }
+  .stat { padding: 24px 44px; text-align: center; border-right: 0.5px solid var(--border); cursor:default; transition:background 0.2s; }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: rgba(26,110,245,0.06); }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: var(--white); transition:color 0.2s; }
+  .stat:hover .stat-num { color: var(--gold); }
+  .stat-num span { color: var(--gold); }
+  .stat-label { font-size: 11px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 3px; }
+
+  /* ── SECTIONS ── */
+  section { padding: 90px 5%; }
+  .sec-header { text-align: center; margin-bottom: 56px; }
+  .sec-tag { font-size: 11px; color: var(--blue2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+  .sec-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -1px; }
+  .sec-sub { font-size: 15px; color: var(--gray); margin-top: 12px; max-width: 480px; margin-left: auto; margin-right: auto; }
+
+  /* ── FILTER TABS ── */
+  .filter-tabs { display:flex; gap:8px; justify-content:center; margin-bottom:36px; flex-wrap:wrap; }
+  .tab-btn {
+    background:transparent; border:0.5px solid var(--border);
+    color:var(--gray); padding:7px 20px; border-radius:20px;
+    font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .tab-btn:hover { border-color:var(--blue2); color:var(--blue2); }
+  .tab-btn.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+
+  /* ── SITE CARDS ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .site-card {
+    background: var(--card); border: 0.5px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    position: relative; overflow: hidden;
+    opacity:0; transform:translateY(24px);
+  }
+  .site-card.visible { opacity:1; transform:translateY(0); transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.25s, box-shadow 0.25s; }
+  .site-card.hidden { display:none; }
+  .site-card::after {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:var(--blue); transform:scaleX(0); transform-origin:left; transition:transform 0.3s;
+  }
+  .site-card:hover { border-color:rgba(26,110,245,0.45); transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,0.3); }
+  .site-card:hover::after { transform:scaleX(1); }
+  .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .ic-blue   { background:rgba(26,110,245,0.18);  color:var(--blue2); }
+  .ic-gold   { background:rgba(245,200,66,0.15);  color:var(--gold); }
+  .ic-green  { background:rgba(52,199,89,0.15);   color:#34c759; }
+  .ic-purple { background:rgba(175,82,222,0.15);  color:#af52de; }
+  .ic-teal   { background:rgba(90,200,250,0.15);  color:#5ac8fa; }
+  .ic-coral  { background:rgba(255,100,80,0.15);  color:#ff6450; }
+  .card-name { font-family:'Syne',sans-serif; font-size:16px; font-weight:600; }
+  .card-url  { font-size:12px; color:var(--blue2); text-decoration:none; }
+  .card-url:hover { text-decoration:underline; }
+  .card-desc { font-size:13px; color:var(--gray); line-height:1.65; margin-bottom:16px; }
+  .card-footer { display:flex; align-items:center; justify-content:space-between; }
+  .badge { font-size:11px; padding:3px 12px; border-radius:20px; font-weight:500; }
+  .badge-free     { background:rgba(52,199,89,0.15);   color:#34c759; }
+  .badge-freemium { background:rgba(26,110,245,0.15);  color:var(--blue2); }
+  .badge-paid     { background:rgba(245,200,66,0.12);  color:var(--gold); }
+  .visit-btn {
+    font-size:12px; color:var(--gray); text-decoration:none;
+    border:0.5px solid var(--border); border-radius:6px;
+    padding:5px 14px; transition:all 0.2s;
+  }
+  .visit-btn:hover { color:var(--white); border-color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.05); }
+
+  /* ── METHODS ── */
+  .methods-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px; max-width:1100px; margin:0 auto; }
+  .method-card {
+    background:var(--card); border:0.5px solid var(--border);
+    border-radius:14px; padding:28px 24px;
+    transition:border-color 0.2s, transform 0.2s;
+    opacity:0; transform:translateY(20px);
+  }
+  .method-card.visible { opacity:1; transform:translateY(0); transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.2s; }
+  .method-card:hover { border-color:rgba(26,110,245,0.35); transform:translateY(-4px); }
+  .method-icon { font-size:30px; margin-bottom:14px; }
+  .method-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:600; margin-bottom:9px; }
+  .method-desc { font-size:13px; color:var(--gray); line-height:1.65; }
+
+  /* ── MARKET CONTEXT ── */
+  .context-box {
+    max-width:900px; margin:0 auto;
+    background:var(--card); border:0.5px solid var(--border);
+    border-radius:16px; padding:44px;
+  }
+  .context-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:24px; }
+  .ctx-item { text-align:center; }
+  .ctx-num { font-family:'Syne',sans-serif; font-size:34px; font-weight:700; color:var(--gold); }
+  .ctx-label { font-size:12px; color:var(--gray); margin-top:4px; }
+  .ctx-text { font-size:14px; color:var(--gray); line-height:1.75; margin-top:28px; border-top:0.5px solid var(--border); padding-top:24px; }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    max-width:800px; margin:0 auto;
+    background:rgba(245,200,66,0.05);
+    border:0.5px solid rgba(245,200,66,0.22);
+    border-radius:12px; padding:30px 34px;
+    font-size:13px; color:var(--gray); line-height:1.75; text-align:center;
+  }
+  .disclaimer strong { color:var(--gold); }
+
+  /* ── BACK TO TOP ── */
+  #btt {
+    position:fixed; bottom:28px; right:28px; z-index:300;
+    width:42px; height:42px; border-radius:50%;
+    background:var(--blue); border:none; color:#fff;
+    font-size:18px; cursor:pointer;
+    opacity:0; transform:translateY(10px); pointer-events:none;
+    transition:opacity 0.3s, transform 0.3s, background 0.2s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #btt.show { opacity:1; transform:translateY(0); pointer-events:all; }
+  #btt:hover { background:var(--blue2); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top:0.5px solid var(--border);
+    padding:32px 5%;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  .footer-logo { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; }
+  .footer-logo span { color:var(--gold); }
+  .footer-copy { font-size:12px; color:var(--gray); }
+  .footer-author { font-size:12px; color:var(--gray); }
+  .footer-author strong { color:var(--blue2); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(22px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { transform:translateX(-50%) scale(1); opacity:0.8; }
+    50%      { transform:translateX(-50%) scale(1.08); opacity:1; }
+  }
+  @keyframes bounce {
+    0%,100% { transform:translateX(-50%) translateY(0); }
+    50%      { transform:translateX(-50%) translateY(8px); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:700px) {
+    .nav-links { display:none; }
+    .hamburger { display:flex; }
+    .stat { padding:18px 22px; }
+    .context-box { padding:26px 20px; }
+    footer { flex-direction:column; text-align:center; }
+    .hero h1 { letter-spacing:-1.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HTML - Structure
+     ============================================================ -->
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-left">
+    <div class="nav-logo">Stock<span>Vision</span></div>
+    <div class="nav-brand">by Dilip.R</div>
+  </div>
+  <div class="nav-links">
+    <a href="#websites">Websites</a>
+    <a href="#methods">Methods</a>
+    <a href="#market">Market</a>
+    <a href="#disclaimer">Disclaimer</a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#websites" onclick="closeMobile()">📊 Websites</a>
+  <a href="#methods"  onclick="closeMobile()">📚 Methods</a>
+  <a href="#market"   onclick="closeMobile()">📈 Market</a>
+  <a href="#disclaimer" onclick="closeMobile()">⚠️ Disclaimer</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-tag">April 2026 Edition</div>
+  <h1>Stock Price<br><span class="gold">Prediction</span> Hub</h1>
+  <p class="hero-sub">Top AI-powered tools, websites, and methods to research, forecast, and analyze stock prices — curated by Dilip.R</p>
+  <div class="hero-btns">
+    <a href="#websites" class="btn-primary">Explore Websites</a>
+    <a href="#methods"  class="btn-secondary">Learn Methods</a>
+  </div>
+  <div class="scroll-down">Scroll</div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats">
+  <div class="stat"><div class="stat-num" data-target="10">0<span>+</span></div><div class="stat-label">Top Websites</div></div>
+  <div class="stat"><div class="stat-num">$66.4T</div><div class="stat-label">Market Cap</div></div>
+  <div class="stat"><div class="stat-num" data-target="30">0<span>%</span></div><div class="stat-label">AI Tool Adoption</div></div>
+  <div class="stat"><div class="stat-num" data-target="5">0<span>+</span></div><div class="stat-label">Prediction Methods</div></div>
+</div>
+
+<!-- WEBSITES SECTION -->
+<section id="websites">
+  <div class="sec-header">
+    <div class="sec-tag">Resources</div>
+    <div class="sec-title">Top Prediction Websites</div>
+    <div class="sec-sub">Click any card to visit the website directly</div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button class="tab-btn active" onclick="filterCards('all',this)">All (10)</button>
+    <button class="tab-btn" onclick="filterCards('free',this)">Free</button>
+    <button class="tab-btn" onclick="filterCards('freemium',this)">Freemium</button>
+    <button class="tab-btn" onclick="filterCards('paid',this)">Paid</button>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid">
+
+    <div class="site-card" data-type="freemium">
+      <div class="card-head">
+        <div class="card-icon ic-blue">TR</div>
+        <div>
+          <div class="card-name">TipRanks</div>
+          <a class="card-url" href="https://www.tipranks.com" target="_blank">tipranks.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Analyst ratings, price targets & institutional research tools for retail investors worldwide.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://www.tipranks.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="freemium">
+      <div class="card-head">
+        <div class="card-icon ic-green">WZ</div>
+        <div>
+          <div class="card-name">WallStreetZen</div>
+          <a class="card-url" href="https://www.wallstreetzen.com/stock-screener/stock-forecast" target="_blank">wallstreetzen.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI stock predictors, screening tools & fundamental analysis made simple for all investors.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://www.wallstreetzen.com/stock-screener/stock-forecast" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="freemium">
+      <div class="card-head">
+        <div class="card-icon ic-gold">SI</div>
+        <div>
+          <div class="card-name">StockInvest.us</div>
+          <a class="card-url" href="https://stockinvest.us" target="_blank">stockinvest.us</a>
+        </div>
+      </div>
+      <div class="card-desc">Technical forecasts & AI advice for 50,000+ stocks across 48 global exchanges.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://stockinvest.us" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="free">
+      <div class="card-head">
+        <div class="card-icon ic-teal">CC</div>
+        <div>
+          <div class="card-name">CoinCodex</div>
+          <a class="card-url" href="https://coincodex.com/stocks/predictions/" target="_blank">coincodex.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI technical analysis using RSI, SMA & EMA indicators. Free stock predictions for all.</div>
+      <div class="card-footer">
+        <span class="badge badge-free">Free</span>
+        <a class="visit-btn" href="https://coincodex.com/stocks/predictions/" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="freemium">
+      <div class="card-head">
+        <div class="card-icon ic-blue">SA</div>
+        <div>
+          <div class="card-name">StockAnalysis</div>
+          <a class="card-url" href="https://stockanalysis.com" target="_blank">stockanalysis.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Financials, earnings calendars & analyst forecasts for 130,000+ stocks and funds.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://stockanalysis.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="paid">
+      <div class="card-head">
+        <div class="card-icon ic-purple">TE</div>
+        <div>
+          <div class="card-name">TradingEconomics</div>
+          <a class="card-url" href="https://tradingeconomics.com/forecast/stock-market" target="_blank">tradingeconomics.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Macro economic data & global stock index forecasts for 196 countries and 20M+ indicators.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://tradingeconomics.com/forecast/stock-market" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="paid">
+      <div class="card-head">
+        <div class="card-icon ic-teal">IK</div>
+        <div>
+          <div class="card-name">I Know First</div>
+          <a class="card-url" href="https://iknowfirst.com" target="_blank">iknowfirst.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Self-learning AI algorithm signals for institutional & retail investors with up to 97% accuracy claims.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://iknowfirst.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="paid">
+      <div class="card-head">
+        <div class="card-icon ic-purple">TS</div>
+        <div>
+          <div class="card-name">TrendSpider</div>
+          <a class="card-url" href="https://trendspider.com" target="_blank">trendspider.com</a>
+        </div>
+      </div>
+      <div class="card-desc">AI strategy builder with 50-year backtesting & custom ML model creation for traders.</div>
+      <div class="card-footer">
+        <span class="badge badge-paid">Paid</span>
+        <a class="visit-btn" href="https://trendspider.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="free">
+      <div class="card-head">
+        <div class="card-icon ic-green">TD</div>
+        <div>
+          <div class="card-name">Tradestie</div>
+          <a class="card-url" href="https://tradestie.com" target="_blank">tradestie.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Free AI bull/bear scenario analysis with analyst ratings & expert insights on any stock.</div>
+      <div class="card-footer">
+        <span class="badge badge-free">Free</span>
+        <a class="visit-btn" href="https://tradestie.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+    <div class="site-card" data-type="freemium">
+      <div class="card-head">
+        <div class="card-icon ic-coral">SK</div>
+        <div>
+          <div class="card-name">Seeking Alpha</div>
+          <a class="card-url" href="https://seekingalpha.com" target="_blank">seekingalpha.com</a>
+        </div>
+      </div>
+      <div class="card-desc">Expert analysis, quant ratings & earnings forecasts from professional market analysts.</div>
+      <div class="card-footer">
+        <span class="badge badge-freemium">Freemium</span>
+        <a class="visit-btn" href="https://seekingalpha.com" target="_blank">Visit →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- METHODS SECTION -->
+<section id="methods" style="background:var(--navy2);">
+  <div class="sec-header">
+    <div class="sec-tag">Education</div>
+    <div class="sec-title">Prediction Methods</div>
+    <div class="sec-sub">How professionals forecast stock prices</div>
+  </div>
+  <div class="methods-grid">
+    <div class="method-card">
+      <div class="method-icon">📈</div>
+      <div class="method-title">Technical Analysis</div>
+      <div class="method-desc">Uses historical price data, volume, moving averages (SMA/EMA), RSI, MACD, and chart patterns to identify trends and forecast future price movements.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🏢</div>
+      <div class="method-title">Fundamental Analysis</div>
+      <div class="method-desc">Evaluates a company's financial health — earnings, revenue growth, P/E ratio, and debt levels — to estimate fair value and predict long-term price.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🤖</div>
+      <div class="method-title">AI & Machine Learning</div>
+      <div class="method-desc">Models like Random Forest, KNN, and neural networks trained on historical data to detect complex patterns beyond human capability.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">🎯</div>
+      <div class="method-title">Analyst Consensus</div>
+      <div class="method-desc">Wall Street sell-side analysts issue 12-month price targets based on deep sector expertise. TipRanks and WallStreetZen aggregate these signals.</div>
+    </div>
+    <div class="method-card">
+      <div class="method-icon">💬</div>
+      <div class="method-title">Sentiment Analysis</div>
+      <div class="method-desc">Scans news headlines, social media, and earnings calls to gauge market sentiment and its potential directional impact on stock prices.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET SECTION -->
+<section id="market">
+  <div class="sec-header">
+    <div class="sec-tag">Context</div>
+    <div class="sec-title">Market Overview — April 2026</div>
+  </div>
+  <div class="context-box">
+    <div class="context-grid">
+      <div class="ctx-item"><div class="ctx-num">$66.4T</div><div class="ctx-label">NYSE/NASDAQ Market Cap</div></div>
+      <div class="ctx-item"><div class="ctx-num">39</div><div class="ctx-label">Fear & Greed Index</div></div>
+      <div class="ctx-item"><div class="ctx-num">30%</div><div class="ctx-label">Retail AI Tool Users</div></div>
+      <div class="ctx-item"><div class="ctx-num">+75%</div><div class="ctx-label">YoY AI Adoption</div></div>
+    </div>
+    <div class="ctx-text">
+      2026 has been one of the most volatile years for investors in recent memory. AI and software stocks dropped over 20% in the first six weeks of the year. Trade policy uncertainty and geopolitical tensions have driven elevated market swings. Despite this, AI-powered prediction tools are seeing record retail adoption — roughly 30% of U.S. retail investors now use AI tools to guide portfolio decisions, up 75% year-over-year (eToro, 2026).
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<section id="disclaimer" style="background:var(--navy2); padding-top:60px; padding-bottom:60px;">
+  <div class="disclaimer">
+    <strong>⚠️ Important Disclaimer</strong><br><br>
+    Stock price predictions are for informational purposes only and do not constitute financial advice.
+    Past performance is not indicative of future results. No prediction model or algorithm guarantees accuracy.
+    Always consult a qualified financial advisor before making investment decisions.
+    Diversification and long-term index investing have historically outperformed most individual stock-picking strategies.
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Stock<span>Vision</span></div>
+  <div class="footer-copy">© 2026 All rights reserved</div>
+  <div class="footer-author">Developed by <strong>Dilip.R</strong></div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+
+<!-- ============================================================
+     JAVASCRIPT - Interactivity & Animations
+     ============================================================ -->
+<script>
+
+  /* ── 1. NAV: scroll shadow + active link highlight ── */
+  const navbar = document.getElementById('navbar');
+  const sections = document.querySelectorAll('section[id], div.hero');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    // Shadow on scroll
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+
+    // Back to top button
+    document.getElementById('btt').classList.toggle('show', window.scrollY > 400);
+
+    // Active nav link
+    let current = '';
+    sections.forEach(sec => {
+      if (window.scrollY >= sec.offsetTop - 120) current = sec.id || '';
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--white)' : '';
+    });
+  });
+
+
+  /* ── 2. HAMBURGER MENU ── */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+
+  function closeMobile() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+
+  /* ── 3. SCROLL REVEAL (Intersection Observer) ── */
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, entry.target.dataset.delay || 0);
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  // Stagger cards
+  document.querySelectorAll('.site-card').forEach((card, i) => {
+    card.dataset.delay = i * 80;
+    revealObserver.observe(card);
+  });
+
+  // Stagger method cards
+  document.querySelectorAll('.method-card').forEach((card, i) => {
+    card.dataset.delay = i * 100;
+    revealObserver.observe(card);
+  });
+
+
+  /* ── 4. FILTER TABS ── */
+  function filterCards(type, btn) {
+    // Update active tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Show/hide cards
+    document.querySelectorAll('.site-card').forEach((card, i) => {
+      const match = type === 'all' || card.dataset.type === type;
+      card.classList.toggle('hidden', !match);
+      if (match) {
+        card.classList.remove('visible');
+        setTimeout(() => card.classList.add('visible'), i * 60);
+      }
+    });
+  }
+
+
+  /* ── 5. COUNTER ANIMATION for stats ── */
+  const counters = document.querySelectorAll('.stat-num[data-target]');
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        const suffix = el.innerHTML.includes('%') ? '<span>%</span>' : '<span>+</span>';
+        let count = 0;
+        const step = Math.ceil(target / 30);
+        const interval = setInterval(() => {
+          count = Math.min(count + step, target);
+          el.innerHTML = count + suffix;
+          if (count >= target) clearInterval(interval);
+        }, 40);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => counterObserver.observe(c));
+
+
+  /* ── 6. SMOOTH active nav on click ── */
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.forEach(l => l.style.color = '');
+      link.style.color = 'var(--white)';
+    });
+  });
+
+</script>
+</body>
+</html>
